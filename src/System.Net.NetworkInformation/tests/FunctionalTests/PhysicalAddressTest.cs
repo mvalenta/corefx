@@ -139,16 +139,6 @@ namespace System.Net.NetworkInformation.Tests
             Assert.Contains(address, ex.Message);
         }
 
-        [Theory]
-        [InlineData("00:11:22:33:44:55", new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 })]
-        [InlineData("0011:2233:4455", new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 })]
-        public void Parse_Valid_DoesNotThrow(string address, byte[] expectedBytes)
-        {
-            PhysicalAddress parsedAddress = PhysicalAddress.Parse(address);
-            byte[] addressBytes = parsedAddress.GetAddressBytes();
-            Assert.Equal(addressBytes, expectedBytes);
-        }
-
         [Fact]
         public void ToString_NullAddress_NullReferenceException()
         {
