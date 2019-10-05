@@ -107,6 +107,7 @@ namespace System.Net.NetworkInformation
         {
             int validCount = 0;
             bool hasDashes = false;
+            bool hasColons = false;
             byte[] buffer = null;
 
             if (address == null)
@@ -119,6 +120,19 @@ namespace System.Net.NetworkInformation
             {
                 hasDashes = true;
                 buffer = new byte[(address.Length + 1) / 3];
+
+                if ((address.Length + 1) % 3 != 0)
+                {
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                }
+            }
+            else if (address.Contains(':'))
+            {
+                hasColons = true;
+                int segments = address.Split(':').Length;
+                int bufferSize = (address.Length + 1) / 3;
+                bufferSize += segments == 3 ? 1 : 0; // Account for xxxx:yyyy:zzzz
+                buffer = new byte[bufferSize];
 
                 if ((address.Length + 1) % 3 != 0)
                 {
@@ -148,9 +162,25 @@ namespace System.Net.NetworkInformation
                 {
                     value -= 0x37;
                 }
+                else if (value >= 0x61 && value <= 0x66) // lowercase
+                {
+                    value -= 0x57;
+                }
                 else if (value == (int)'-')
                 {
                     if (validCount == 2)
+                    {
+                        validCount = 0;
+                        continue;
+                    }
+                    else
+                    {
+                        throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                    }
+                }
+                else if (value == (int)':')
+                {
+                    if (validCount == 2 || validCount == 4)
                     {
                         validCount = 0;
                         continue;
@@ -167,6 +197,10 @@ namespace System.Net.NetworkInformation
 
                 // we had too many characters after the last dash
                 if (hasDashes && validCount >= 2)
+                {
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                }
+                if (hasColons && validCount >= 4)
                 {
                     throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
