@@ -120,7 +120,10 @@ namespace System.Net.NetworkInformation
             if (address.Contains('-'))
             {
                 hasDashes = true;
-                buffer = new byte[(address.Length + 1) / 3];
+                int segmentLength = address.Split('-')[0].Length;
+                int bufferSize = (address.Length + 1) / 3;
+                bufferSize += segmentLength == 4 ? 1 : 0; // Account for xxxx-yyyy-zzzz
+                buffer = new byte[bufferSize];
 
                 if ((address.Length + 1) % 3 != 0)
                 {
@@ -182,7 +185,7 @@ namespace System.Net.NetworkInformation
                 }
                 else if (value == (int)'-')
                 {
-                    if (validCount == 2)
+                    if (validCount == 2 || validCount == 4)
                     {
                         validCount = 0;
                         continue;
@@ -222,11 +225,7 @@ namespace System.Net.NetworkInformation
                 }
 
                 // we had too many characters after the last dash
-                if (hasDashes && validCount >= 2)
-                {
-                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
-                }
-                if ((hasPeriods || hasColons) && validCount >= 4)
+                if ((hasPeriods || hasColons || hasDashes) && validCount >= 4)
                 {
                     throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }

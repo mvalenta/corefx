@@ -89,6 +89,7 @@ namespace System.Net.NetworkInformation.Tests
             yield return new object[] { "0011:2233:4455", new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
             yield return new object[] { "0011.2233.4455", new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
             yield return new object[] { "0011:2233:4455", new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
+            yield return new object[] { "0011-2233-4455", new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
             yield return new object[]
             {
                 "00-01-02-03-04-05-06-07-08-09-0A-0B-0C-0D-0E-0F-10-11-12-13-14-15-16-17-18-19-1A-1B-1C-1D-1E-1F-" +
@@ -123,7 +124,7 @@ namespace System.Net.NetworkInformation.Tests
         {
             PhysicalAddress parsedAddress = PhysicalAddress.Parse(address);
             byte[] addressBytes = parsedAddress.GetAddressBytes();
-            Assert.Equal(addressBytes, expectedBytes);
+            Assert.Equal(expectedBytes, addressBytes);
         }
 
         [Theory]
