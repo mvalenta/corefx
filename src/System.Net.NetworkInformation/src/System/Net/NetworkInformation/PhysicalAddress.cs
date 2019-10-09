@@ -108,6 +108,7 @@ namespace System.Net.NetworkInformation
             int validCount = 0;
             bool hasDashes = false;
             bool hasColons = false;
+            bool hasPeriods = false;
             byte[] buffer = null;
 
             if (address == null)
@@ -132,6 +133,19 @@ namespace System.Net.NetworkInformation
                 int segments = address.Split(':').Length;
                 int bufferSize = (address.Length + 1) / 3;
                 bufferSize += segments == 3 ? 1 : 0; // Account for xxxx:yyyy:zzzz
+                buffer = new byte[bufferSize];
+
+                if ((address.Length + 1) % 3 != 0)
+                {
+                    throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                }
+            }
+            else if (address.Contains('.'))
+            {
+                hasPeriods = true;
+                int segments = address.Split('.').Length;
+                int bufferSize = (address.Length + 1) / 3;
+                bufferSize += (segments == 3) ? 1 : 0; // Account for xxxx.yyyy.zzzz
                 buffer = new byte[bufferSize];
 
                 if ((address.Length + 1) % 3 != 0)
@@ -190,6 +204,18 @@ namespace System.Net.NetworkInformation
                         throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                     }
                 }
+                else if (value == (int)'.')
+                {
+                    if (validCount == 4)
+                    {
+                        validCount = 0;
+                        continue;
+                    }
+                    else
+                    {
+                        throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
+                    }
+                }
                 else
                 {
                     throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
@@ -200,7 +226,7 @@ namespace System.Net.NetworkInformation
                 {
                     throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
-                if (hasColons && validCount >= 4)
+                if ((hasPeriods || hasColons) && validCount >= 4)
                 {
                     throw new FormatException(SR.Format(SR.net_bad_mac_address, address));
                 }
